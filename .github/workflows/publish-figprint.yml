@@ -39,7 +39,7 @@ jobs:
         id: version
         shell: pwsh
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           # Read major.minor from csproj.
           [xml]$csproj = Get-Content FIGPrint/FIGPrint.csproj
@@ -137,7 +137,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         shell: pwsh
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           $version = "${{ steps.version.outputs.version }}"
           $banner  = Get-Content assets/banners/figprint.txt -Raw -Encoding UTF8
@@ -168,7 +168,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         shell: pwsh
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           $newTag = "figprint-v${{ steps.version.outputs.version }}"
           gh release list --limit 1000 --json tagName --jq '.[].tagName' |

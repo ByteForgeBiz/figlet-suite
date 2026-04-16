@@ -38,7 +38,7 @@ jobs:
       - name: Compute version
         id: version
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         working-directory: FIGLet.Python
         run: |
           # Read major.minor from pyproject.toml.
@@ -119,7 +119,7 @@ jobs:
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           {
             echo '```'
@@ -145,7 +145,7 @@ jobs:
       - name: Delete previous releases
         if: steps.check_tag.outputs.exists == 'false'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           NEW_TAG="figlet-py-v${{ steps.version.outputs.version }}"
           gh release list --limit 1000 --json tagName \

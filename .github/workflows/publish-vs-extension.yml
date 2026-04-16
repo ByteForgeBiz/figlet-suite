@@ -42,7 +42,7 @@ jobs:
         id: version
         shell: pwsh
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           # Read major.minor from the vsixmanifest.
           $manifestPath = Resolve-Path "FIGLet.VisualStudioExtension/source.extension.vsixmanifest"
@@ -171,7 +171,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           {
             echo '```'
@@ -199,7 +199,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           NEW_TAG="vsext-v${{ steps.version.outputs.version }}"
           gh release list --limit 1000 --json tagName \
