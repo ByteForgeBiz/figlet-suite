@@ -3,45 +3,47 @@ name: Publish All
 on:
   workflow_dispatch:
 
-permissions:
-  actions: write
-
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 jobs:
   trigger-publishers:
+    permissions:
+      actions: write
     runs-on: ubuntu-latest
     steps:
       - name: Trigger FIGPrint publish
-        uses: peter-evans/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@2026-refresh
         with:
           workflow: publish-figprint.yml
           ref: ${{ github.ref_name }}
 
       - name: Trigger FIGLet NuGet publish
-        uses: peter-evans/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@2026-refresh
         with:
           workflow: publish-figlet-nuget.yml
           ref: ${{ github.ref_name }}
 
       - name: Trigger FIGLet Python publish
-        uses: peter-evans/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@2026-refresh
         with:
           workflow: publish-figlet-py.yml
           ref: ${{ github.ref_name }}
 
       - name: Trigger FIGLet TS publish
-        uses: peter-evans/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@2026-refresh
         with:
           workflow: publish-figlet-ts.yml
           ref: ${{ github.ref_name }}
 
       - name: Trigger VS Extension publish
-        uses: peter-evans/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@2026-refresh
         with:
           workflow: publish-vs-extension.yml
           ref: ${{ github.ref_name }}
 
       - name: Trigger VSCode Extension publish
-        uses: peter-evans/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@2026-refresh
         with:
           workflow: publish-vscode-extension.yml
           ref: ${{ github.ref_name }}
