@@ -8,6 +8,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+if ($IsWindows -eq $false) {
+    throw "This script requires a Windows environment. The temporary batch runner (.bat) is not supported on non-Windows platforms."
+}
+
 function Assert-GitSuccess {
     param(
         [Parameter(Mandatory = $true)]
@@ -235,7 +239,7 @@ if ($stashRelevantStatus.Count -gt 0) {
             Sort-Object -Unique
     )
 
-    $stashArguments = @('stash', 'push', '--all', '--message', $stashName, '--', '.')
+    $stashArguments = @('stash', 'push', '--include-untracked', '--message', $stashName, '--', '.')
     foreach ($ignoredDotFolder in $ignoredDotFolders) {
         $stashArguments += ":(top,glob,exclude)$ignoredDotFolder/**"
     }
@@ -255,7 +259,7 @@ if ($stashRelevantStatus.Count -gt 0) {
 
 $tempBat = Join-Path ([System.IO.Path]::GetTempPath()) ("update-from-master-{0}.bat" -f ([guid]::NewGuid().ToString('N')))
 $repoRootEscaped = $repoRoot.Replace('%', '%%').Replace('"', '""')
-$currentBranchEscaped = $currentBranch.Replace('"', '""')
+$currentBranchEscaped = $currentBranch.Replace('%', '%%').Replace('"', '""')
 
 $batchContent = @"
 @echo off
@@ -345,6 +349,11 @@ finally {
 
         if (-not $hasGitState) {
             git -C $repoRoot switch -- $currentBranch | Out-Null
+            $switchBackExitCode = $LASTEXITCODE
+
+            if ($switchBackExitCode -ne 0) {
+                Write-Warning "Failed to switch back to the original branch '$currentBranch' during cleanup. You may still be on '$branchAfterRun'."
+            }
         }
     }
 
