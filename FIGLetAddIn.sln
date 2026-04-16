@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		LICENSE = LICENSE
 		readme.md = readme.md
+		Update-FromMaster.ps1 = Update-FromMaster.ps1
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIGLet.VisualStudioExtension", "FIGLet.VisualStudioExtension\FIGLet.VisualStudioExtension.csproj", "{E6189E8C-3834-4AB3-81BF-76308527EAF9}"
