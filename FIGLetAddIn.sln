@@ -33,6 +33,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHubActions", "GitHubActions", "{D2C96421-FC23-4240-A03B-BEAF2FE5B4FF}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\publish-all.yml = .github\workflows\publish-all.yml
 		.github\workflows\publish-figlet-nuget.yml = .github\workflows\publish-figlet-nuget.yml
 		.github\workflows\publish-figlet-py.yml = .github\workflows\publish-figlet-py.yml
 		.github\workflows\publish-figlet-ts.yml = .github\workflows\publish-figlet-ts.yml
