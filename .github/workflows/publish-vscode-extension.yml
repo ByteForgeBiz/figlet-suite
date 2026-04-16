@@ -49,7 +49,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Read major.minor from package.json.
-          BASE=$(node -p "require('./package.json').version.replace(/\.\d+$/, '')")
+          BASE=$(node -p "require('./FIGLet.VSCodeExtension/package.json').version.replace(/\.\d+$/, '')")
 
           # Helper: PATCH an existing variable, fall back to POST on first run.
           upsert_var() {
