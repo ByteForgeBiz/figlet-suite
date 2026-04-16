@@ -3,12 +3,10 @@ name: Publish All
 on:
   workflow_dispatch:
 
-permissions:
-  actions: write
-  contents: write
-
 jobs:
   trigger-publishers:
+    permissions:
+      actions: write
     runs-on: ubuntu-latest
     steps:
       - name: Trigger FIGPrint publish
