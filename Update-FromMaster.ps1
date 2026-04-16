@@ -239,7 +239,7 @@ if ($stashRelevantStatus.Count -gt 0) {
             Sort-Object -Unique
     )
 
-    $stashArguments = @('stash', 'push', '--include-untracked', '--message', $stashName, '--', '.')
+    $stashArguments = @('stash', 'push', '--all', '--message', $stashName, '--', '.')
     foreach ($ignoredDotFolder in $ignoredDotFolders) {
         $stashArguments += ":(top,glob,exclude)$ignoredDotFolder/**"
     }
