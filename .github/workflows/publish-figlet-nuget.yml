@@ -38,7 +38,7 @@ jobs:
       - name: Compute version
         id: version
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           # Read major.minor from csproj.
           BASE=$(grep -oPm1 "(?<=<Version>)[^<]+" FIGLet/FIGLet.csproj | sed 's/\.[0-9]*$//')
@@ -110,7 +110,7 @@ jobs:
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           {
             echo '```'
@@ -136,7 +136,7 @@ jobs:
       - name: Delete previous releases
         if: steps.check_tag.outputs.exists == 'false'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           NEW_TAG="figlet-v${{ steps.version.outputs.version }}"
           gh release list --limit 1000 --json tagName \

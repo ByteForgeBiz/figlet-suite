@@ -46,7 +46,7 @@ jobs:
       - name: Compute version
         id: version
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           # Read major.minor from package.json.
           BASE=$(node -p "require('./package.json').version.replace(/\.\d+$/, '')")
@@ -138,7 +138,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         working-directory: .
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           {
             echo '```'
@@ -165,7 +165,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         working-directory: .
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
           NEW_TAG="vscode-v${{ steps.version.outputs.version }}"
           gh release list --limit 1000 --json tagName \
