@@ -3,6 +3,9 @@ name: Publish All
 on:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 jobs:
   trigger-publishers:
     permissions:
