@@ -136,7 +136,7 @@ jobs:
           echo "tarball=$TARBALL" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         working-directory: .
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
