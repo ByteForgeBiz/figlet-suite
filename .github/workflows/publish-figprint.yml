@@ -183,7 +183,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
         run: |
-          $owner        = ${{ github.repository_owner }}
+          $owner        = "${{ github.repository_owner }}"
           $version      = "${{ steps.version.outputs.version }}"
           $x64Url       = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-x64.zip"
           $arm64Url     = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-arm64.zip"
