@@ -64,6 +64,7 @@ jobs:
           $storedPatch = (gh api "repos/${{ github.repository }}/actions/variables/FIGPRINT_PATCH" --jq '.value' 2>$null)
           if ($LASTEXITCODE -ne 0) { $storedPatch = "0" }
 
+
           if ($base -ne $storedMajMin) {
             # Major/minor changed — write PATCH first so a failure between the two
             # writes leaves MAJ_MIN stale and the mismatch is safely re-detected next run.
@@ -82,7 +83,8 @@ jobs:
             -replace '<Version>[^<]*</Version>', "<Version>$newVersion</Version>" |
             Set-Content FIGPrint/FIGPrint.csproj -NoNewline
           echo "version=$newVersion" >> $env:GITHUB_OUTPUT
-          echo "Version: $newVersion"
+          echo "Old version: $base"
+          echo "Version    : $newVersion"
 
       - name: Check if tag exists
         id: check_tag
@@ -181,11 +183,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
         run: |
-          $version    = "${{ steps.version.outputs.version }}"
-          $x64Url     = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-x64.zip"
-          $arm64Url   = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-arm64.zip"
-          $token      = "${{ secrets.WINGET_GITHUB_TOKEN }}"
-          $packageId  = "ByteForge.FIGPrint"
+          $owner        = ${{ github.repository_owner }}
+          $version      = "${{ steps.version.outputs.version }}"
+          $x64Url       = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-x64.zip"
+          $arm64Url     = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-arm64.zip"
+          $token        = "${{ secrets.WINGET_GITHUB_TOKEN }}"
+          $packageId    = "ByteForge.FIGPrint"
           $manifestsOut = "./winget-manifests"
 
           # Detect whether ByteForge.FIGPrint already exists in winget-pkgs
@@ -261,7 +264,7 @@ jobs:
             "PackageVersion: $version",
             "PackageLocale: en-US",
             "Publisher: ByteForge",
-            "PublisherUrl: https://github.com/PaulStSmith",
+            "PublisherUrl: https://github.com/${{ $owner }}",
             "PublisherSupportUrl: https://github.com/${{ github.repository }}/issues",
             "PackageName: FIGPrint",
             "PackageUrl: https://github.com/${{ github.repository }}",
@@ -310,29 +313,28 @@ jobs:
           Write-Host "Generated $($yamlFiles.Count) manifest file(s):"
           $yamlFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
 
-          # Identify the token owner (the fork will live under their account)
-          $ownerLogin = gh api user --jq '.login'
-          Write-Host "Submitting PR as: $ownerLogin"
+          # Identify the repo owner
+          Write-Host "Submitting PR as: $owner"
 
           # Ensure a fork of microsoft/winget-pkgs exists under the token owner
           gh repo fork microsoft/winget-pkgs --clone=false
-          Write-Host "Fork ready at $ownerLogin/winget-pkgs"
+          Write-Host "Fork ready at $owner/winget-pkgs"
 
           # Get the current HEAD SHA of microsoft/winget-pkgs master
           $baseSha = gh api repos/microsoft/winget-pkgs/git/refs/heads/master --jq '.object.sha'
 
           # Create (or recreate) a branch on the fork
           $branchName = "figprint-v$version"
-          $existingRef = gh api "repos/$ownerLogin/winget-pkgs/git/refs/heads/$branchName" 2>&1
+          $existingRef = gh api "repos/$owner/winget-pkgs/git/refs/heads/$branchName" 2>&1
           if ($LASTEXITCODE -eq 0) {
             Write-Host "Branch $branchName already exists — deleting and recreating"
-            gh api "repos/$ownerLogin/winget-pkgs/git/refs/heads/$branchName" -X DELETE
+            gh api "repos/$owner/winget-pkgs/git/refs/heads/$branchName" -X DELETE
             if ($LASTEXITCODE -ne 0) {
               Write-Error "Failed to delete existing branch $branchName"
               exit 1
             }
           }
-          gh api "repos/$ownerLogin/winget-pkgs/git/refs" `
+          gh api "repos/$owner/winget-pkgs/git/refs" `
             -X POST `
             -f ref="refs/heads/$branchName" `
             -f sha="$baseSha"
@@ -357,7 +359,7 @@ jobs:
                             branch  = $branchName
                           } | ConvertTo-Json -Compress
             Write-Host "Uploading $($file.Name) → $targetPath"
-            $body | gh api "repos/$ownerLogin/winget-pkgs/contents/$targetPath" `
+            $body | gh api "repos/$owner/winget-pkgs/contents/$targetPath" `
               -X PUT --input -
             if ($LASTEXITCODE -ne 0) {
               Write-Error "Failed to upload $($file.Name) to $targetPath"
@@ -377,7 +379,7 @@ jobs:
           Write-Host "Opening PR: $prTitle"
           gh pr create `
             --repo  microsoft/winget-pkgs `
-            --head  "$ownerLogin`:$branchName" `
+            --head  "$owner`:$branchName" `
             --base  master `
             --title $prTitle `
             --body  $prBody
