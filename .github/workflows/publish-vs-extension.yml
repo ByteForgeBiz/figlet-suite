@@ -128,7 +128,7 @@ jobs:
           }
 
       - name: Publish to VS Marketplace
-        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
+        if: steps.check_tag.outputs.exists == 'false' && (github.event_name == 'pull_request' || github.ref_name == 'master')
         shell: pwsh
         env:
           VS_MARKETPLACE_PAT: ${{ secrets.VS_MARKETPLACE_PAT }}
@@ -168,11 +168,11 @@ jobs:
           }
 
       - name: Publish to VS Marketplace (dry run — not on master)
-        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master'
+        if: steps.check_tag.outputs.exists == 'false' && github.event_name == 'workflow_dispatch' && github.ref_name != 'master'
         run: echo "Would publish to VS Marketplace if this were the master branch."
 
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
+        if: steps.check_tag.outputs.exists == 'false' && (github.event_name == 'pull_request' || github.ref_name == 'master')
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
@@ -200,7 +200,7 @@ jobs:
             "${{ steps.find_vsix.outputs.vsix_path }}"
 
       - name: Delete previous releases
-        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
+        if: steps.check_tag.outputs.exists == 'false' && (github.event_name == 'pull_request' || github.ref_name == 'master')
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
