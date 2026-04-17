@@ -49,7 +49,6 @@ jobs:
           # Throws on failure so the step fails fast rather than silently continuing
           # with stale variables.
           function Upsert-ActionsVar([string]$Name, [string]$Value) {
-            Write-Host "GH_TOKEN: $env:GH_TOKEN"
             gh api "repos/${{ github.repository }}/actions/variables/$Name" `
               -X PATCH -f value="$Value" 2>$null
             if ($LASTEXITCODE -ne 0) {
@@ -64,6 +63,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { $storedMajMin = "" }
           $storedPatch = (gh api "repos/${{ github.repository }}/actions/variables/FIGPRINT_PATCH" --jq '.value' 2>$null)
           if ($LASTEXITCODE -ne 0) { $storedPatch = "0" }
+
+          Write-Host "GH_TOKEN: $env:GH_TOKEN"
+          Write-Host "Base version from csproj: $base"
+          Write-Host "Stored version: $storedMajMin.$storedPatch"
 
           if ($base -ne $storedMajMin) {
             # Major/minor changed — write PATCH first so a failure between the two
