@@ -134,7 +134,7 @@ jobs:
           Compress-Archive -Path ./publish/win-arm64/* -DestinationPath "./FIGPrint-$version-win-arm64.zip"
 
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
@@ -165,7 +165,7 @@ jobs:
             "FIGPrint-$version-win-arm64.zip"
 
       - name: Delete previous releases
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
@@ -176,7 +176,7 @@ jobs:
             ForEach-Object { gh release delete $_ --yes --cleanup-tag }
 
       - name: Submit to winget
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
@@ -382,3 +382,7 @@ jobs:
             --base  master `
             --title $prTitle `
             --body  $prBody
+
+      - name: Submit to winget (dry run — not on master)
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master' && github.ref_name != 'main'
+        run: echo "Would submit to winget if this were the master branch."

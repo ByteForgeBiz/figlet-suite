@@ -104,11 +104,15 @@ jobs:
         run: dotnet pack FIGLet/FIGLet.csproj --configuration Release --no-build --output ./nupkg
 
       - name: Push to NuGet
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
+      - name: Push to NuGet (dry run — not on master)
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master' && github.ref_name != 'main'
+        run: echo "Would push to NuGet if this were the master branch."
+
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
@@ -134,7 +138,7 @@ jobs:
             ./nupkg/*.nupkg
 
       - name: Delete previous releases
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
