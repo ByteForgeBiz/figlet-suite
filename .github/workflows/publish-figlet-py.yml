@@ -109,15 +109,19 @@ jobs:
         run: twine check dist/*
 
       - name: Publish to PyPI
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         working-directory: FIGLet.Python
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: twine upload --verbose dist/*
 
+      - name: Publish to PyPI (dry run — not on master)
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master' && github.ref_name != 'main'
+        run: echo "Would publish to PyPI if this were the master branch."
+
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |
@@ -143,7 +147,7 @@ jobs:
             FIGLet.Python/dist/*
 
       - name: Delete previous releases
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
         run: |

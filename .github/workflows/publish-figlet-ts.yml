@@ -119,20 +119,24 @@ jobs:
         run: npm run build
 
       - name: Publish to npm
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --provenance
 
+      - name: Publish to npm (dry run — not on master)
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master' && github.ref_name != 'main'
+        run: echo "Would publish to npm if this were the master branch."
+
       - name: Pack npm tarball
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         id: pack
         run: |
           TARBALL=$(npm pack 2>&1 | tail -1)
           echo "tarball=$TARBALL" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         working-directory: .
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
@@ -159,7 +163,7 @@ jobs:
             "FIGLet.TS/${{ steps.pack.outputs.tarball }}"
 
       - name: Delete previous releases
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
         working-directory: .
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
