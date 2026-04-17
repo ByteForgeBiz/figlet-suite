@@ -3,7 +3,7 @@ name: Publish FIGPrint
 on:
   pull_request:
     types: [closed]
-    branches: [master, main]
+    branches: [master]
     paths:
       - 'FIGPrint/**/*.cs'
   workflow_dispatch:
@@ -134,7 +134,7 @@ jobs:
           Compress-Archive -Path ./publish/win-arm64/* -DestinationPath "./FIGPrint-$version-win-arm64.zip"
 
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
+        if: steps.check_tag.outputs.exists == 'false' && (github.event_name == 'pull_request' || github.ref_name == 'master')
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
@@ -165,7 +165,7 @@ jobs:
             "FIGPrint-$version-win-arm64.zip"
 
       - name: Delete previous releases
-        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
+        if: steps.check_tag.outputs.exists == 'false' && (github.event_name == 'pull_request' || github.ref_name == 'master')
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.ORG_TOKEN }}
@@ -176,16 +176,17 @@ jobs:
             ForEach-Object { gh release delete $_ --yes --cleanup-tag }
 
       - name: Submit to winget
-        if: steps.check_tag.outputs.exists == 'false' && github.ref_name == 'master'
+        if: steps.check_tag.outputs.exists == 'false' && (github.event_name == 'pull_request' || github.ref_name == 'master')
         shell: pwsh
         env:
-          GH_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PJ_TOKEN }}
         run: |
           $owner        = "${{ github.repository_owner }}"
+          $forkOwner    = gh api user --jq '.login'
           $version      = "${{ steps.version.outputs.version }}"
           $x64Url       = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-x64.zip"
           $arm64Url     = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-arm64.zip"
-          $token        = "${{ secrets.WINGET_GITHUB_TOKEN }}"
+          $token        = "${{ secrets.PJ_TOKEN }}"
           $packageId    = "ByteForge.FIGPrint"
           $manifestsOut = "./winget-manifests"
 
@@ -262,7 +263,7 @@ jobs:
             "PackageVersion: $version",
             "PackageLocale: en-US",
             "Publisher: ByteForge",
-            "PublisherUrl: https://github.com/PaulStSmith",
+            "PublisherUrl: https://github.com/$owner",
             "PublisherSupportUrl: https://github.com/${{ github.repository }}/issues",
             "PackageName: FIGPrint",
             "PackageUrl: https://github.com/${{ github.repository }}",
@@ -311,28 +312,28 @@ jobs:
           Write-Host "Generated $($yamlFiles.Count) manifest file(s):"
           $yamlFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
 
-          # Identify the token owner (the fork will live under their account)
-          Write-Host "Submitting PR as: $owner"
+          # Identify the token owner (the fork will live under their personal account)
+          Write-Host "Submitting PR as: $forkOwner"
 
-          # Ensure a fork of microsoft/winget-pkgs exists under the token owner
+          # Ensure a fork of microsoft/winget-pkgs exists under the personal account
           gh repo fork microsoft/winget-pkgs --clone=false
-          Write-Host "Fork ready at $owner/winget-pkgs"
+          Write-Host "Fork ready at $forkOwner/winget-pkgs"
 
           # Get the current HEAD SHA of microsoft/winget-pkgs master
           $baseSha = gh api repos/microsoft/winget-pkgs/git/refs/heads/master --jq '.object.sha'
 
           # Create (or recreate) a branch on the fork
           $branchName = "figprint-v$version"
-          $existingRef = gh api "repos/$owner/winget-pkgs/git/refs/heads/$branchName" 2>&1
+          $existingRef = gh api "repos/$forkOwner/winget-pkgs/git/refs/heads/$branchName" 2>&1
           if ($LASTEXITCODE -eq 0) {
             Write-Host "Branch $branchName already exists — deleting and recreating"
-            gh api "repos/$owner/winget-pkgs/git/refs/heads/$branchName" -X DELETE
+            gh api "repos/$forkOwner/winget-pkgs/git/refs/heads/$branchName" -X DELETE
             if ($LASTEXITCODE -ne 0) {
               Write-Error "Failed to delete existing branch $branchName"
               exit 1
             }
           }
-          gh api "repos/$owner/winget-pkgs/git/refs" `
+          gh api "repos/$forkOwner/winget-pkgs/git/refs" `
             -X POST `
             -f ref="refs/heads/$branchName" `
             -f sha="$baseSha"
@@ -357,7 +358,7 @@ jobs:
                             branch  = $branchName
                           } | ConvertTo-Json -Compress
             Write-Host "Uploading $($file.Name) → $targetPath"
-            $body | gh api "repos/$owner/winget-pkgs/contents/$targetPath" `
+            $body | gh api "repos/$forkOwner/winget-pkgs/contents/$targetPath" `
               -X PUT --input -
             if ($LASTEXITCODE -ne 0) {
               Write-Error "Failed to upload $($file.Name) to $targetPath"
@@ -377,11 +378,11 @@ jobs:
           Write-Host "Opening PR: $prTitle"
           gh pr create `
             --repo  microsoft/winget-pkgs `
-            --head  "$owner`:$branchName" `
+            --head  "$forkOwner`:$branchName" `
             --base  master `
             --title $prTitle `
             --body  $prBody
 
       - name: Submit to winget (dry run — not on master)
-        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master' && github.ref_name != 'main'
+        if: steps.check_tag.outputs.exists == 'false' && github.event_name == 'workflow_dispatch' && github.ref_name != 'master'
         run: echo "Would submit to winget if this were the master branch."
