@@ -183,11 +183,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
         run: |
-          $version    = "${{ steps.version.outputs.version }}"
-          $x64Url     = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-x64.zip"
-          $arm64Url   = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-arm64.zip"
-          $token      = "${{ secrets.WINGET_GITHUB_TOKEN }}"
-          $packageId  = "ByteForge.FIGPrint"
+          $owner        = ${{ github.repository_owner }}
+          $version      = "${{ steps.version.outputs.version }}"
+          $x64Url       = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-x64.zip"
+          $arm64Url     = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-arm64.zip"
+          $token        = "${{ secrets.WINGET_GITHUB_TOKEN }}"
+          $packageId    = "ByteForge.FIGPrint"
           $manifestsOut = "./winget-manifests"
 
           # Detect whether ByteForge.FIGPrint already exists in winget-pkgs
@@ -263,7 +264,7 @@ jobs:
             "PackageVersion: $version",
             "PackageLocale: en-US",
             "Publisher: ByteForge",
-            "PublisherUrl: https://github.com/${{ github.repository }}",
+            "PublisherUrl: https://github.com/${{ $owner }}",
             "PublisherSupportUrl: https://github.com/${{ github.repository }}/issues",
             "PackageName: FIGPrint",
             "PackageUrl: https://github.com/${{ github.repository }}",
@@ -312,8 +313,7 @@ jobs:
           Write-Host "Generated $($yamlFiles.Count) manifest file(s):"
           $yamlFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
 
-          # Identify the token owner (the fork will live under their account)
-          $owner = ${{ github.repository_owner }}
+          # Identify the repo owner
           Write-Host "Submitting PR as: $owner"
 
           # Ensure a fork of microsoft/winget-pkgs exists under the token owner
