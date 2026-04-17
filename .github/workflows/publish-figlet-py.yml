@@ -3,7 +3,7 @@ name: Publish FIGLet Python
 on:
   pull_request:
     types: [closed]
-    branches: [master, main]
+    branches: [master]
     paths:
       - 'FIGLet.Python/**/*.py'
   workflow_dispatch:
@@ -117,7 +117,7 @@ jobs:
         run: twine upload --verbose dist/*
 
       - name: Publish to PyPI (dry run — not on master)
-        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master' && github.ref_name != 'main'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master'
         run: echo "Would publish to PyPI if this were the master branch."
 
       - name: Create GitHub Release

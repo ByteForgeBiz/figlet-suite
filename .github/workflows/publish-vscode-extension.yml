@@ -3,7 +3,7 @@ name: Publish VS Code Extension
 on:
   pull_request:
     types: [closed]
-    branches: [master, main]
+    branches: [master]
     paths:
       - 'FIGLet.VSCodeExtension/**/*.ts'
       - 'FIGLet.VSCodeExtension/**/*.tsx'
@@ -135,7 +135,7 @@ jobs:
         run: vsce publish --packagePath "${{ steps.package.outputs.vsix_name }}" -p ${{ secrets.VSCE_PAT }}
 
       - name: Publish to VS Code Marketplace (dry run — not on master)
-        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master' && github.ref_name != 'main'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master'
         run: echo "Would publish to VS Code Marketplace if this were the master branch."
 
       - name: Create GitHub Release

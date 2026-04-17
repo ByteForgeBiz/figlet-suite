@@ -3,7 +3,7 @@ name: Publish Visual Studio Extension
 on:
   pull_request:
     types: [closed]
-    branches: [master, main]
+    branches: [master]
     paths:
       - 'FIGLet.VisualStudioExtension/**/*.cs'
       - 'FIGLet/**/*.cs'  # VS Extension depends on FIGLet library
@@ -168,7 +168,7 @@ jobs:
           }
 
       - name: Publish to VS Marketplace (dry run — not on master)
-        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master' && github.ref_name != 'main'
+        if: steps.check_tag.outputs.exists == 'false' && github.ref_name != 'master'
         run: echo "Would publish to VS Marketplace if this were the master branch."
 
       - name: Create GitHub Release
