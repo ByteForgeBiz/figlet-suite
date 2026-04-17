@@ -15,14 +15,14 @@
   ],
   "author": "Paulo Santos",
   "license": "MIT",
-  "homepage": "https://github.com/PaulStSmith/figlet-comment-generator#readme",
+  "homepage": "https://github.com/ByteForgeBiz/figlet-suite#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PaulStSmith/figlet-comment-generator.git",
+    "url": "https://github.com/ByteForgeBiz/figlet-suite.git",
     "directory": "FIGLet.TS"
   },
   "bugs": {
-    "url": "https://github.com/PaulStSmith/figlet-comment-generator/issues"
+    "url": "https://github.com/ByteForgeBiz/figlet-suite/issues"
   },
   "engines": {
     "node": ">=18"
