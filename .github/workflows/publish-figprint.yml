@@ -312,28 +312,27 @@ jobs:
           $yamlFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
 
           # Identify the token owner (the fork will live under their account)
-          $ownerLogin = gh api user --jq '.login'
-          Write-Host "Submitting PR as: $ownerLogin"
+          Write-Host "Submitting PR as: $owner"
 
           # Ensure a fork of microsoft/winget-pkgs exists under the token owner
           gh repo fork microsoft/winget-pkgs --clone=false
-          Write-Host "Fork ready at $ownerLogin/winget-pkgs"
+          Write-Host "Fork ready at $owner/winget-pkgs"
 
           # Get the current HEAD SHA of microsoft/winget-pkgs master
           $baseSha = gh api repos/microsoft/winget-pkgs/git/refs/heads/master --jq '.object.sha'
 
           # Create (or recreate) a branch on the fork
           $branchName = "figprint-v$version"
-          $existingRef = gh api "repos/$ownerLogin/winget-pkgs/git/refs/heads/$branchName" 2>&1
+          $existingRef = gh api "repos/$owner/winget-pkgs/git/refs/heads/$branchName" 2>&1
           if ($LASTEXITCODE -eq 0) {
             Write-Host "Branch $branchName already exists — deleting and recreating"
-            gh api "repos/$ownerLogin/winget-pkgs/git/refs/heads/$branchName" -X DELETE
+            gh api "repos/$owner/winget-pkgs/git/refs/heads/$branchName" -X DELETE
             if ($LASTEXITCODE -ne 0) {
               Write-Error "Failed to delete existing branch $branchName"
               exit 1
             }
           }
-          gh api "repos/$ownerLogin/winget-pkgs/git/refs" `
+          gh api "repos/$owner/winget-pkgs/git/refs" `
             -X POST `
             -f ref="refs/heads/$branchName" `
             -f sha="$baseSha"
@@ -358,7 +357,7 @@ jobs:
                             branch  = $branchName
                           } | ConvertTo-Json -Compress
             Write-Host "Uploading $($file.Name) → $targetPath"
-            $body | gh api "repos/$ownerLogin/winget-pkgs/contents/$targetPath" `
+            $body | gh api "repos/$owner/winget-pkgs/contents/$targetPath" `
               -X PUT --input -
             if ($LASTEXITCODE -ne 0) {
               Write-Error "Failed to upload $($file.Name) to $targetPath"
@@ -378,7 +377,7 @@ jobs:
           Write-Host "Opening PR: $prTitle"
           gh pr create `
             --repo  microsoft/winget-pkgs `
-            --head  "$ownerLogin`:$branchName" `
+            --head  "$owner`:$branchName" `
             --base  master `
             --title $prTitle `
             --body  $prBody
