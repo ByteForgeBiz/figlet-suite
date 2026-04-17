@@ -244,7 +244,7 @@ jobs:
           #
           # The Version manifest
           #
-          @("# yaml-language-server: $schema=https://aka.ms/winget-manifest.version.1.12.0.schema.json",
+          @("# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.12.0.schema.json",
             "",
             "PackageIdentifier: $PackageId",
             "PackageVersion: $version",
@@ -257,7 +257,7 @@ jobs:
           #
           # The Default Locale manifest
           #
-          @("# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json",
+          @("# yaml-language-server: `$schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json",
             "",
             "PackageIdentifier: $PackageId",
             "PackageVersion: $version",
@@ -278,7 +278,7 @@ jobs:
           #
           # The Installer manifest
           #
-          @("# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json",
+          @("# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json",
             "",
             "PackageIdentifier: $PackageId",
             "PackageVersion: $version",
